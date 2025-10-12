@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id               Int          @id @default(autoincrement())
+  email            String       @unique
+  password         String
+  username         String
+  fecha_nacimiento DateTime
+  gustos           Gusto[]
+  comentarios      Comentario[]
+}
+
+model Gusto {
+  id            Int      @id @default(autoincrement())
+  favoritos     Boolean
+  reproducida   Boolean
+  ver_mas_tarde Boolean
+  calificacion  Int
+  usuarioId     Int
+  peliculaId    Int
+  usuario       Usuario  @relation(fields: [usuarioId], references: [id])
+  pelicula      Pelicula @relation(fields: [peliculaId], references: [id])
+
+  @@unique([usuarioId, peliculaId])
+}
+
+model Comentario {
+  id                Int          @id @default(autoincrement())
+  mensaje           String
+  usuarioId         Int
+  peliculaId        Int
+  comentarioPadreId Int?
+  usuario           Usuario      @relation(fields: [usuarioId], references: [id])
+  pelicula          Pelicula     @relation(fields: [peliculaId], references: [id])
+  respuestas        Comentario[] @relation("Respuestas")
+  comentarioPadre   Comentario?  @relation("Respuestas", fields: [comentarioPadreId], references: [id])
+}
+
+model Pelicula {
+  id              Int           @id @default(autoincrement())
+  duracion        Int
+  largometraje    String
+  actores         String
+  año            Int
+  disponible      Boolean
+  sinopsis        String
+  trailer         String
+  titulo          String
+  director        String
+  portada         String
+  paisId          Int
+  clasificacionId Int
+  idiomaId        Int
+  pais            Pais          @relation(fields: [paisId], references: [id])
+  clasificacion   Clasificacion @relation(fields: [clasificacionId], references: [id])
+  idioma          Idioma        @relation(fields: [idiomaId], references: [id])
+  gustos          Gusto[]
+  subtitulos      Subtitulo[]
+  comentarios     Comentario[]
+  catalogos       Catalogo[]
+}
+
+model Pais {
+  id        Int        @id @default(autoincrement())
+  nombre    String
+  bandera   String
+  peliculas Pelicula[]
+}
+
+model Clasificacion {
+  id          Int        @id @default(autoincrement())
+  nombre      String
+  edad_minima Int
+  peliculas   Pelicula[]
+}
+
+model Genero {
+  id          Int        @id @default(autoincrement())
+  descripcion String
+  estado      Boolean
+  catalogos   Catalogo[]
+}
+
+model Catalogo {
+  id         Int      @id @default(autoincrement())
+  peliculaId Int
+  generoId   Int
+  pelicula   Pelicula @relation(fields: [peliculaId], references: [id])
+  genero     Genero   @relation(fields: [generoId], references: [id])
+}
+
+model Idioma {
+  id         Int         @id @default(autoincrement())
+  nombre     String
+  version    String
+  subtitulos Subtitulo[]
+  peliculas  Pelicula[]
+}
+
+model Subtitulo {
+  id          Int      @id @default(autoincrement())
+  estado      Boolean
+  color       String
+  fuente      String
+  descriptiva Boolean
+  peliculaId  Int
+  idiomaId    Int
+  pelicula    Pelicula @relation(fields: [peliculaId], references: [id])
+  idioma      Idioma   @relation(fields: [idiomaId], references: [id])
+}
