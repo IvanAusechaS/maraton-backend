@@ -1,0 +1,23 @@
+{
+    "tags": {
+      "allowUnknownTags": true
+    },
+    "source": {
+      "include": ["./src", "./index.ts"],
+      "includePattern": "\\.(jsx|js|ts|tsx)$",
+      "excludePattern": "(node_modules/|docs)"
+    },
+    "plugins": [
+      "node_modules/better-docs/typescript"
+    ],
+    "opts": {
+      "destination": "docs",
+      "recurse": true,
+      "readme": "README.md"
+    },
+    "templates": {
+      "better-docs": {
+        "name": "Maraton Backend Documentation"
+      }
+    }
+  }
