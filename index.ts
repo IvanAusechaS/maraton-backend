@@ -1,14 +1,16 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import "dotenv/config";
-import router from "./src/routes/routes";
+//import router from "./src/routes/routes";
+import usuarioRoutes from './src/routes/usuario' 
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(cors());
-app.use("/api", router); 
+//app.use("/api", router); 
+app.use('/api/usuarios', usuarioRoutes)
 
 app.get("/",(req: Request, res: Response) => res.send("Server is running"));
 
