@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import prisma from '../db/client'
-import { globalErrorHandler, notFoundHandler } from '../middlewares/errorHandler';
+import { globalErrorHandler, notFoundHandler } from '../error_manage/errorHandler';
 
 const router = Router();
 
