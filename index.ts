@@ -2,19 +2,22 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import "dotenv/config";
 //import router from "./src/routes/routes";
-import usuarioRoutes from "./src/routes/usuario";
-import authRoutes from "./src/routes/auth";
+import usuarioRoutes from './src/routes/usuario'
+import { notFoundHandler, globalErrorHandler } from './src/error_manage/errorHandler';
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-//app.use("/api", router);
-app.use("/api/usuarios", usuarioRoutes);
-app.use("/api/auth", authRoutes);
+//app.use("/api", router); 
+app.use('/api/usuarios', usuarioRoutes)
 
-app.get("/", (req: Request, res: Response) => res.send("Server is running"));
+app.use(notFoundHandler);
+
+app.use(globalErrorHandler);
+
+app.get("/",(req: Request, res: Response) => res.send("Server is running"));
 
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
