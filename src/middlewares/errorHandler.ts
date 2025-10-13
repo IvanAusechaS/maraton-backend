@@ -71,7 +71,9 @@ const notFoundHandler = (req: Request, res: Response): void => {
     method: req.method,
     availableEndpoints: [
       'GET /api/usuarios/',
-      'POST /api/usuarios/:id'
+      'GET /api/usuarios/:id',
+      'PUT /api/usuarios/:id',
+      'DELETE /api/usuarios/:id'
     ]
   });
 };
