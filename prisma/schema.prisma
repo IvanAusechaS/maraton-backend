@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -19,8 +13,8 @@ model Usuario {
   password         String
   username         String
   fecha_nacimiento DateTime
-  gustos           Gusto[]
   comentarios      Comentario[]
+  gustos           Gusto[]
 }
 
 model Gusto {
@@ -31,8 +25,8 @@ model Gusto {
   calificacion  Int
   usuarioId     Int
   peliculaId    Int
-  usuario       Usuario  @relation(fields: [usuarioId], references: [id])
   pelicula      Pelicula @relation(fields: [peliculaId], references: [id])
+  usuario       Usuario  @relation(fields: [usuarioId], references: [id])
 
   @@unique([usuarioId, peliculaId])
 }
@@ -43,10 +37,10 @@ model Comentario {
   usuarioId         Int
   peliculaId        Int
   comentarioPadreId Int?
-  usuario           Usuario      @relation(fields: [usuarioId], references: [id])
-  pelicula          Pelicula     @relation(fields: [peliculaId], references: [id])
-  respuestas        Comentario[] @relation("Respuestas")
   comentarioPadre   Comentario?  @relation("Respuestas", fields: [comentarioPadreId], references: [id])
+  respuestas        Comentario[] @relation("Respuestas")
+  pelicula          Pelicula     @relation(fields: [peliculaId], references: [id])
+  usuario           Usuario      @relation(fields: [usuarioId], references: [id])
 }
 
 model Pelicula {
@@ -64,13 +58,13 @@ model Pelicula {
   paisId          Int
   clasificacionId Int
   idiomaId        Int
-  pais            Pais          @relation(fields: [paisId], references: [id])
+  catalogos       Catalogo[]
+  comentarios     Comentario[]
+  gustos          Gusto[]
   clasificacion   Clasificacion @relation(fields: [clasificacionId], references: [id])
   idioma          Idioma        @relation(fields: [idiomaId], references: [id])
-  gustos          Gusto[]
+  pais            Pais          @relation(fields: [paisId], references: [id])
   subtitulos      Subtitulo[]
-  comentarios     Comentario[]
-  catalogos       Catalogo[]
 }
 
 model Pais {
@@ -98,16 +92,16 @@ model Catalogo {
   id         Int      @id @default(autoincrement())
   peliculaId Int
   generoId   Int
-  pelicula   Pelicula @relation(fields: [peliculaId], references: [id])
   genero     Genero   @relation(fields: [generoId], references: [id])
+  pelicula   Pelicula @relation(fields: [peliculaId], references: [id])
 }
 
 model Idioma {
   id         Int         @id @default(autoincrement())
   nombre     String
   version    String
-  subtitulos Subtitulo[]
   peliculas  Pelicula[]
+  subtitulos Subtitulo[]
 }
 
 model Subtitulo {
@@ -118,6 +112,6 @@ model Subtitulo {
   descriptiva Boolean
   peliculaId  Int
   idiomaId    Int
-  pelicula    Pelicula @relation(fields: [peliculaId], references: [id])
   idioma      Idioma   @relation(fields: [idiomaId], references: [id])
+  pelicula    Pelicula @relation(fields: [peliculaId], references: [id])
 }
