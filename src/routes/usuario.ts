@@ -1,17 +1,17 @@
-import { Router } from 'express'
-import prisma from '../db/client'
+import { Router, Request, Response } from "express";
+import prisma from "../db/client";
 
-const router = Router()
+const router = Router();
 
 // GET /api/usuarios
-router.get('/', async (req, res) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
-    const usuarios = await prisma.usuario.findMany()
-    res.json(usuarios)
+    const usuarios = await prisma.usuario.findMany();
+    res.json(usuarios);
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ error: 'Error al obtener usuarios' })
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener usuarios" });
   }
-})
+});
 
-export default router
+export default router;
