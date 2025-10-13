@@ -12,6 +12,7 @@ const router = Router();
 router.post("/register", async (req: Request, res: Response) => {
   try {
     const { email, password, username, birth_date } = req.body;
+    //console.log({ email, password, username, birth_date })
 
     // Validación de campos requeridos
     if (!email || !password || !username || !birth_date) {
@@ -27,9 +28,14 @@ router.post("/register", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Formato de email inválido" });
     }
 
+    console.log("Password recibido:", password);
+
+
+
     // Validación de longitud de contraseña
     const passRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#.])[A-Za-z\d@$!%*?&#.]{8,}$/; // Son validos los puntos para las contraseñas
+    console.log("Regex test:", passRegex.test(password));
     if (!passRegex.test(password)) {
       return res.status(400).json({
         error: "La contraseña no cumple con los requerimientos",
@@ -266,7 +272,7 @@ router.post("/reset/:token", async (req: Request, res: Response) => {
      * Must contain: 8+ chars, uppercase, lowercase, number, special char.
      */
     const regex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#.])[A-Za-z\d@$!%*?&#.]{8,}$/; // Son validos los puntos para las contraseñas
     if (!regex.test(password)) {
       return res.status(400).json({
         message:
