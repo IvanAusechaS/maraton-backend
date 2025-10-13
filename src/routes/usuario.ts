@@ -78,44 +78,92 @@ router.get('/:id', async (req, res) => {
  * 10. On database error: Delegates to global error handler
  * 
  */
+
 router.put('/:id', async (req, res) => {
-  const { id } = req.params
-  const { email, username, fecha_nacimiento} = req.body
+  const { id } = req.params;
+  const { email, username, fecha_nacimiento } = req.body;
+
   try {
+    const userId = Number(id);
+    if (Number.isNaN(userId)) {
+      return res.status(400).json({ error: 'ID inválido' });
+    }
+
     const usuario = await prisma.usuario.findUnique({
-      where: { id: Number(id) },
-    })
+      where: { id: userId },
+    });
+
     if (!usuario) {
-      return res.status(404).json({ error: 'Usuario no encontrado' })
+      return res.status(404).json({ error: 'Usuario no encontrado' });
     }
-    if (!email && !username && !fecha_nacimiento) {
-      return res.status(400).json({ error: 'Al menos un campo debe llenarse' })
+
+    // Verificar que venga al menos un campo a actualizar
+    if (email === undefined && username === undefined && fecha_nacimiento === undefined) {
+      return res.status(400).json({ error: 'Al menos un campo debe llenarse' });
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ error: "Formato de email inválido" });
-    }
-    const existentUser = await prisma.usuario.findUnique({
-      where: { email },
-    });
-    if (existentUser) {
-      return res.status(409).json({ error: "El email ya está registrado" });
-    }
-    const birthDate = new Date(fecha_nacimiento);
-    if (isNaN(birthDate.getTime())) {
-      return res.status(400).json({
-        error: "Formato de fecha inválido. Use formato ISO: YYYY-MM-DD",
+
+    // Construir objeto de datos de forma condicional
+    const data: Record<string, any> = {};
+
+    // Validar email solo si viene
+    if (email !== undefined) {
+      const emailTrimmed = String(email).toLowerCase().trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailTrimmed)) {
+        return res.status(400).json({ error: 'Formato de email inválido' });
+      }
+
+      // Comprobar que el email no esté usado por otro usuario (ignorar el actual)
+      const existentUser = await prisma.usuario.findFirst({
+        where: {
+          email: emailTrimmed,
+          NOT: { id: userId }
+        },
       });
+
+      if (existentUser) {
+        return res.status(409).json({ error: 'El email ya está registrado' });
+      }
+
+      data.email = emailTrimmed;
     }
+
+    // Validar username solo si viene
+    if (username !== undefined) {
+      const usernameTrimmed = String(username).trim();
+      if (usernameTrimmed.length === 0) {
+        return res.status(400).json({ error: 'Username no puede estar vacío' });
+      }
+      data.username = usernameTrimmed;
+    }
+
+    // Validar fecha_nacimiento solo si viene
+    if (fecha_nacimiento !== undefined) {
+      const birthDate = new Date(fecha_nacimiento);
+      if (isNaN(birthDate.getTime())) {
+        return res.status(400).json({
+          error: 'Formato de fecha inválido. Use formato ISO: YYYY-MM-DD',
+        });
+      }
+      data.fecha_nacimiento = birthDate;
+    }
+
+    // Si por alguna razón data quedó vacío (redundante porque ya chequeamos arriba), evitar update innecesario
+    if (Object.keys(data).length === 0) {
+      return res.status(400).json({ error: 'No hay campos válidos para actualizar' });
+    }
+
     const updatedUsuario = await prisma.usuario.update({
-      where: { id: Number(id) },
-      data: { email: email.toLowerCase().trim(), username: username.trim(), fecha_nacimiento: birthDate },
+      where: { id: userId },
+      data,
     });
-    res.status(200).json(updatedUsuario);
+
+    return res.status(200).json(updatedUsuario);
   } catch (error) {
     return globalErrorHandler(error, req, res);
   }
-})
+});
+
 
 // DELETE /api/usuarios/:id
 /**
