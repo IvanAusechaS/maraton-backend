@@ -2,7 +2,8 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import "dotenv/config";
 //import router from "./src/routes/routes";
-import usuarioRoutes from './src/routes/usuario' 
+import usuarioRoutes from './src/routes/usuario'
+import { notFoundHandler, globalErrorHandler } from './src/middlewares/errorHandler';
 
 const app = express();
 
@@ -11,6 +12,10 @@ app.use(express.urlencoded({extended: true}));
 app.use(cors());
 //app.use("/api", router); 
 app.use('/api/usuarios', usuarioRoutes)
+
+app.use(notFoundHandler);
+
+app.use(globalErrorHandler);
 
 app.get("/",(req: Request, res: Response) => res.send("Server is running"));
 

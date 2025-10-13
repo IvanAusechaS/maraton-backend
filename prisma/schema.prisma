@@ -8,13 +8,15 @@ datasource db {
 }
 
 model Usuario {
-  id               Int          @id @default(autoincrement())
-  email            String       @unique
-  password         String
-  username         String
-  fecha_nacimiento DateTime
-  comentarios      Comentario[]
-  gustos           Gusto[]
+  id                   Int          @id @default(autoincrement())
+  email                String       @unique
+  password             String
+  username             String
+  fecha_nacimiento     DateTime
+  resetPasswordExpires DateTime?
+  resetPasswordToken   String?
+  comentarios          Comentario[]
+  gustos               Gusto[]
 }
 
 model Gusto {
