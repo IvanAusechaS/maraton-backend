@@ -219,7 +219,7 @@ router.post("/recover", async (req: Request, res: Response) => {
      * Create password reset URL.
      * Points to frontend recovery page.
      */
-    const resetUrl = `http://localhost:3000/api/auth/reset/${resetToken}`;
+    const resetUrl = `http://localhost:5174/restablecer?token=${resetToken}`;
 
     /**
      * Send reset email with instructions.
