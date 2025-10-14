@@ -52,16 +52,24 @@ async function sendEmail(
     /**
      * Create SMTP transporter with environment configuration.
      * Uses TLS encryption (secure: false with STARTTLS).
+     * Added connection and socket timeouts for Render compatibility.
      * @type {nodemailer.Transporter}
      */
+    const smtpPort = Number(process.env.SMTP_PORT) || 587;
     const transporter: nodemailer.Transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
-      secure: false,
+      port: smtpPort,
+      secure: smtpPort === 465, // true for 465 (SSL), false for 587 (STARTTLS)
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      tls: {
+        rejectUnauthorized: false, // Accept self-signed certificates
+      },
+      connectionTimeout: 10000, // 10 seconds
+      greetingTimeout: 10000, // 10 seconds
+      socketTimeout: 15000, // 15 seconds
     } as nodemailer.TransportOptions);
 
     /**
