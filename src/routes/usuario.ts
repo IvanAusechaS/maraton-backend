@@ -22,7 +22,9 @@ router.get('/', async (req, res) => {
     const usuarios = await prisma.usuario.findMany()
     res.status(200).json(usuarios)
   } catch (error) {
-    return globalErrorHandler(error, req, res);
+    //return globalErrorHandler(error, req, res);
+    console.error('❌ Error en /api/usuarios:', error);
+    //next(error); // lo manda al globalErrorHandler
   }
 })
 
