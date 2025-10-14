@@ -136,10 +136,19 @@ router.post("/login", loginLimiter, async (req: Request, res: Response) => {
         email: usuario.email,
       },
       process.env.JWT_SECRET as string,
-      { expiresIn: "2h" }
+      { expiresIn: "24h" }
     );
 
-    // Respuesta exitosa sin incluir la contraseña
+    // ✅ GUARDAR TOKEN EN COOKIE HTTP-ONLY
+    res.cookie('authToken', token, {
+      httpOnly: true,  // ✅ NO accesible desde JavaScript (previene XSS)
+      secure: process.env.NODE_ENV === 'production', // ✅ Solo HTTPS en producción
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // ✅ Para CORS
+      maxAge: 24 * 60 * 60 * 1000, // 24 horas en milisegundos
+      path: '/',
+    });
+
+    // ✅ NO ENVIAR EL TOKEN EN EL JSON (solo datos del usuario)
     res.status(200).json({
       message: "Inicio de sesión exitoso",
       usuario: {
@@ -148,7 +157,7 @@ router.post("/login", loginLimiter, async (req: Request, res: Response) => {
         username: usuario.username,
         fecha_nacimiento: usuario.fecha_nacimiento,
       },
-      token,
+      // ❌ NO incluir "token" aquí
     });
   } catch (error) {
     console.error("Error en login:", error);
@@ -160,6 +169,14 @@ router.post("/login", loginLimiter, async (req: Request, res: Response) => {
 
 // POST /auth/logout - Cierre de sesión
 router.post("/logout", verify, async (req: Request, res: Response) => {
+  // ✅ Limpiar la cookie HTTP-only
+  res.clearCookie('authToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    path: '/',
+  });
+  
   return res.status(200).json({ message: "Sesión cerrada correctamente" });
 });
 
