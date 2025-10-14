@@ -19,33 +19,27 @@ declare global {
 }
 
 /**
- * Middleware function to verify and validate JWT tokens.
- * Extracts token from Authorization header, verifies it, and adds user data to request.
+ * Middleware function to verify and validate JWT tokens from HTTP-only cookies.
+ * Extracts token from cookie, verifies it, and adds user data to request.
  * Must run BEFORE the request reaches protected route controllers.
  *
  * @function verifyToken
  * @param {Object} req - Express request object
- * @param {Object} req.headers - Request headers object
- * @param {string} req.headers.authorization - Authorization header with Bearer token
+ * @param {Object} req.cookies - Request cookies object
+ * @param {string} req.cookies.authToken - JWT token stored in HTTP-only cookie
  * @param {Object} res - Express response object
  * @param {Function} next - Express next middleware function
  * @returns {Object} JSON response with error message or calls next() if valid
- * @description Validates JWT token and adds decoded user info to req.user
+ * @description Validates JWT token from cookie and adds decoded user info to req.user
  *
  * @example
  * // Usage in routes:
  * router.get('/protected', verifyToken, protectedController);
  *
  * @example
- * // Expected Authorization header format:
- * headers: {
- *   'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
- * }
- *
- * @example
  * // After successful verification, req.user contains:
  * req.user = {
- *   id: "userId123",
+ *   userId: "userId123",
  *   email: "user@example.com",
  *   iat: 1672531200,
  *   exp: 1672617600
@@ -54,31 +48,17 @@ declare global {
 const verifyToken = (req: Request, res: Response, next: NextFunction) => {
   try {
     /**
-     * Extract Authorization header from request.
-     * Should contain "Bearer <token>" format.
+     * Extract JWT token from HTTP-only cookie.
+     * Cookie name must match what's set in login route.
      */
-    const authHeader = req.headers.authorization;
+    const token = req.cookies.authToken;
 
     /**
-     * Check if Authorization header exists.
+     * Check if token exists in cookies.
      * Return 401 if missing.
      */
-    if (!authHeader) {
-      return res.status(401).json({ message: "Access denied" });
-    }
-
-    /**
-     * Extract token from "Bearer <token>" format.
-     * Split by space and take second part.
-     */
-    const token = authHeader.split(" ")[1];
-
-    /**
-     * Verify token exists after splitting.
-     * Return 401 if token is missing.
-     */
     if (!token) {
-      return res.status(401).json({ message: "Access token is missing" });
+      return res.status(401).json({ message: "Autenticación requerida" });
     }
 
     /**
@@ -92,6 +72,8 @@ const verifyToken = (req: Request, res: Response, next: NextFunction) => {
      * Makes user data available in subsequent middleware/controllers.
      */
     req.user = decoded;
+
+    console.log('✅ Usuario autenticado:', (decoded as any).userId);
 
     /**
      * Continue to next middleware or route handler.
