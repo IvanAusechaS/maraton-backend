@@ -4,8 +4,8 @@
   "description": "Movie platform - Maraton project Backend.",
   "main": "index.ts",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
+    "build": "prisma generate",
+    "start": "node --require ts-node/register src/index.ts",
     "dev": "ts-node-dev --respawn src/index.ts",
     "docs": "jsdoc -c jsdoc.json",
     "postinstall": "prisma generate"
@@ -33,7 +33,9 @@
     "nodemailer": "^7.0.9",
     "pexels": "^1.4.0",
     "prisma": "^6.17.1",
-    "resend": "^6.1.2"
+    "resend": "^6.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
@@ -50,9 +52,7 @@
     "eslint": "^9.37.0",
     "jsdoc": "^4.0.5",
     "nodemon": "^3.1.10",
-    "ts-node": "^10.9.2",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.9.3"
+    "ts-node-dev": "^2.0.0"
   },
   "directories": {
     "doc": "docs"
