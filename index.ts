@@ -3,6 +3,7 @@ import cors from "cors";
 import "dotenv/config";
 //import router from "./src/routes/routes";
 import usuarioRoutes from './src/routes/usuario'
+import authRoutes from "./src/routes/auth";
 import { notFoundHandler, globalErrorHandler } from './src/error_manage/errorHandler';
 
 const app = express();
