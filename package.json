@@ -30,7 +30,8 @@
     "express-rate-limit": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.9",
-    "pexels": "^1.4.0"
+    "pexels": "^1.4.0",
+    "resend": "^6.1.2"
   },
   "devDependencies": {
     "@prisma/client": "^6.17.1",

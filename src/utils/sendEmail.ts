@@ -1,17 +1,17 @@
 /**
- * @fileoverview Email utility module for sending emails via SMTP.
- * Provides a simple interface for sending emails using nodemailer with HTML support.
- * Configured to work with environment variables for SMTP settings.
+ * @fileoverview Email utility module for sending emails via Resend API.
+ * Provides a simple interface for sending emails using Resend (free tier: 3000 emails/month).
+ * Configured to work with environment variables.
  * @author Tudu Development Team
- * @version 1.0.0
- * @requires nodemailer
+ * @version 2.0.0
+ * @requires resend
  */
 
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
 /**
- * Sends an email using SMTP configuration from environment variables.
- * Creates a transporter instance and sends both text and HTML versions of the email.
+ * Sends an email using Resend API.
+ * Works perfectly with Render free tier (no SMTP port restrictions).
  *
  * @async
  * @function sendEmail
@@ -25,7 +25,7 @@ import nodemailer from "nodemailer";
  * // Send a simple email
  * await sendEmail(
  *   'user@example.com',
- *   'Welcome to Tudu',
+ *   'Welcome to Maraton',
  *   'Thank you for signing up!'
  * );
  *
@@ -38,10 +38,7 @@ import nodemailer from "nodemailer";
  *   `Click here to reset your password: ${resetUrl}`
  * );
  *
- * @requires process.env.SMTP_HOST - SMTP server hostname
- * @requires process.env.SMTP_PORT - SMTP server port number
- * @requires process.env.SMTP_USER - SMTP authentication username
- * @requires process.env.SMTP_PASS - SMTP authentication password
+ * @requires process.env.RESEND_API_KEY - Resend API key (get from https://resend.com)
  */
 async function sendEmail(
   to: string,
@@ -50,43 +47,36 @@ async function sendEmail(
 ): Promise<void> {
   try {
     /**
-     * Create SMTP transporter with environment configuration.
-     * Uses TLS encryption (secure: false with STARTTLS).
-     * Added connection and socket timeouts for Render compatibility.
-     * @type {nodemailer.Transporter}
+     * Check if API key is configured
      */
-    const smtpPort = Number(process.env.SMTP_PORT) || 587;
-    const transporter: nodemailer.Transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: smtpPort,
-      secure: smtpPort === 465, // true for 465 (SSL), false for 587 (STARTTLS)
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-      tls: {
-        rejectUnauthorized: false, // Accept self-signed certificates
-      },
-      connectionTimeout: 10000, // 10 seconds
-      greetingTimeout: 10000, // 10 seconds
-      socketTimeout: 15000, // 15 seconds
-    } as nodemailer.TransportOptions);
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error("RESEND_API_KEY no está configurada");
+    }
 
     /**
-     * Email options configuration.
-     * Includes both plain text and HTML versions for better compatibility.
-     * @type {nodemailer.SendMailOptions}
+     * Initialize Resend client with API key
      */
-    const mailOptions: nodemailer.SendMailOptions = {
-      from: `"Maraton Support" <${process.env.SMTP_USER}>`,
-      to,
-      subject,
-      text,
-      html: `<p>${text}</p>`,
-    };
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
-    await transporter.sendMail(mailOptions);
-    console.log(`📧 Email enviado a ${to}`);
+    /**
+     * Send email via Resend API
+     * Note: 'from' email must be verified in Resend dashboard
+     * For development, you can use: onboarding@resend.dev
+     */
+    const { data, error } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || "Maraton <onboarding@resend.dev>",
+      to: [to],
+      subject: subject,
+      text: text,
+      html: `<p>${text.replace(/\n/g, '<br>')}</p>`,
+    });
+
+    if (error) {
+      console.error("❌ Error de Resend:", error);
+      throw new Error(`Error enviando email: ${error.message}`);
+    }
+
+    console.log(`📧 Email enviado a ${to} (ID: ${data?.id})`);
   } catch (error) {
     console.error("❌ Error enviando email:", error);
     throw new Error("No se pudo enviar el correo");
