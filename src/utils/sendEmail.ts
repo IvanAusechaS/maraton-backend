@@ -1,17 +1,18 @@
 /**
- * @fileoverview Email utility module for sending emails via Resend API.
- * Provides a simple interface for sending emails using Resend (free tier: 3000 emails/month).
- * Configured to work with environment variables.
+ * @fileoverview Email utility module for sending emails via SendGrid API.
+ * Provides a simple interface for sending emails using SendGrid (free tier: 100 emails/day).
+ * No domain required, works perfectly with academic projects.
  * @author Tudu Development Team
- * @version 2.0.0
- * @requires resend
+ * @version 4.0.0
+ * @requires @sendgrid/mail
  */
 
-import { Resend } from "resend";
+import sgMail from "@sendgrid/mail";
 
 /**
- * Sends an email using Resend API.
+ * Sends an email using SendGrid API.
  * Works perfectly with Render free tier (no SMTP port restrictions).
+ * Free tier: 100 emails/day, no domain verification needed.
  *
  * @async
  * @function sendEmail
@@ -38,7 +39,8 @@ import { Resend } from "resend";
  *   `Click here to reset your password: ${resetUrl}`
  * );
  *
- * @requires process.env.RESEND_API_KEY - Resend API key (get from https://resend.com)
+ * @requires process.env.SENDGRID_API_KEY - SendGrid API key (get from https://sendgrid.com)
+ * @requires process.env.SENDGRID_FROM_EMAIL - Verified sender email in SendGrid
  */
 async function sendEmail(
   to: string,
@@ -49,36 +51,41 @@ async function sendEmail(
     /**
      * Check if API key is configured
      */
-    if (!process.env.RESEND_API_KEY) {
-      throw new Error("RESEND_API_KEY no está configurada");
+    if (!process.env.SENDGRID_API_KEY) {
+      throw new Error("SENDGRID_API_KEY no está configurada");
+    }
+
+    if (!process.env.SENDGRID_FROM_EMAIL) {
+      throw new Error("SENDGRID_FROM_EMAIL no está configurada");
     }
 
     /**
-     * Initialize Resend client with API key
+     * Configure SendGrid with API key
      */
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
     /**
-     * Send email via Resend API
-     * Note: 'from' email must be verified in Resend dashboard
-     * For development, you can use: onboarding@resend.dev
+     * Prepare email message
      */
-    const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "Maraton <onboarding@resend.dev>",
-      to: [to],
+    const msg = {
+      to: to,
+      from: process.env.SENDGRID_FROM_EMAIL,
       subject: subject,
       text: text,
       html: `<p>${text.replace(/\n/g, '<br>')}</p>`,
-    });
+    };
 
-    if (error) {
-      console.error("❌ Error de Resend:", error);
-      throw new Error(`Error enviando email: ${error.message}`);
-    }
+    /**
+     * Send email via SendGrid API
+     */
+    await sgMail.send(msg);
 
-    console.log(`📧 Email enviado a ${to} (ID: ${data?.id})`);
-  } catch (error) {
+    console.log(`📧 Email enviado a ${to}`);
+  } catch (error: any) {
     console.error("❌ Error enviando email:", error);
+    if (error.response) {
+      console.error("SendGrid error:", error.response.body);
+    }
     throw new Error("No se pudo enviar el correo");
   }
 }
@@ -89,3 +96,4 @@ async function sendEmail(
  * @type {Function}
  */
 export default sendEmail;
+
