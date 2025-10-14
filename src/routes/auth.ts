@@ -235,8 +235,13 @@ router.post("/recover", async (req: Request, res: Response) => {
     /**
      * Create password reset URL.
      * Points to frontend recovery page.
+     * Uses production URL in production, dev URL in development.
      */
-    const resetUrl = `http://localhost:5174/restablecer?token=${resetToken}`;
+    const frontendUrl = process.env.NODE_ENV === 'production' 
+      ? process.env.FRONTEND_URL_PROD 
+      : process.env.FRONTEND_URL_DEV;
+    
+    const resetUrl = `${frontendUrl}/restablecer?token=${resetToken}`;
 
     /**
      * Send reset email with instructions.
