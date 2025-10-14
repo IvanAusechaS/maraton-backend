@@ -8,6 +8,9 @@ import { notFoundHandler, globalErrorHandler } from './src/error_manage/errorHan
 
 const app = express();
 
+// Trust proxy - Required for Render and other hosting platforms behind reverse proxies
+app.set("trust proxy", 1);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
