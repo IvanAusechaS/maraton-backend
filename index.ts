@@ -12,6 +12,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 //app.use("/api", router); 
 app.use('/api/usuarios', usuarioRoutes)
+app.use("/api/auth", authRoutes);
 
 app.use(notFoundHandler);
 
