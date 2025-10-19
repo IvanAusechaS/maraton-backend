@@ -27,7 +27,7 @@ router.get("/", async (req, res) => {
     res.status(200).json(usuarios);
   } catch (error) {
     //return globalErrorHandler(error, req, res);
-    console.error('❌ Error en /api/usuarios:', error);
+    console.error("❌ Error en /api/usuarios:", error);
     //next(error); // lo manda al globalErrorHandler
   }
 });
@@ -291,6 +291,70 @@ router.delete("/:id", async (req, res) => {
       where: { id: Number(id) },
     });
     res.status(204).send();
+  } catch (error) {
+    return globalErrorHandler(error, req, res);
+  }
+});
+
+router.post("/favorites", async (req, res) => {
+  const { userId, movieId } = req.body;
+  try {
+    const user = await prisma.usuario.findUnique({
+      where: { id: Number(userId) },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    const movie = await prisma.pelicula.findUnique({
+      where: { id: Number(movieId) },
+    });
+
+    if (!movie) {
+      return res.status(404).json({ error: "Pelicula no encontrada" });
+    }
+
+    const preferences = await prisma.gusto.findUnique({
+      where: {
+        usuarioId_peliculaId: {
+          usuarioId: Number(userId),
+          peliculaId: Number(movieId),
+        },
+      },
+    });
+
+    if (preferences) {
+      await prisma.gusto.update({
+        where: {
+          usuarioId_peliculaId: {
+            usuarioId: Number(userId),
+            peliculaId: Number(movieId),
+          },
+        },
+        data: { favoritos: true },
+      });
+
+      res.status(200).json({ message: "Pelicula añadida a favoritos" });
+    } else {
+      const newPreference = await prisma.gusto.create({
+        data: {
+          usuarioId: Number(userId),
+          peliculaId: Number(movieId),
+          favoritos: true,
+          //reproducida: false,
+          //ver_mas_tarde: false,
+          //calificacion: 0,
+        },
+      });
+
+      res
+        .status(201)
+        .json({
+          message: "Pelicula añadida a favoritos",
+          gusto: newPreference,
+        });
+    }
   } catch (error) {
     return globalErrorHandler(error, req, res);
   }
