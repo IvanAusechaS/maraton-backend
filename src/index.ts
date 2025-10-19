@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import "dotenv/config";
 //import router from "./src/routes/routes";
 import usuarioRoutes from './routes/usuario'
+import peliculaRoutes from './routes/pelicula'
 import authRoutes from "./routes/auth";
 import { notFoundHandler, globalErrorHandler } from './error_manage/errorHandler';
 
@@ -51,6 +52,7 @@ app.use(express.json());           // 3️⃣ JSON parser tercero
 app.use(express.urlencoded({ extended: true }));
 //app.use("/api", router); 
 app.use('/api/usuarios', usuarioRoutes)
+app.use('/api/peliculas', peliculaRoutes)
 app.use("/api/auth", authRoutes);
 
 app.use(notFoundHandler);
