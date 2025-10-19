@@ -48,7 +48,7 @@ model Comentario {
 model Pelicula {
   id              Int           @id @default(autoincrement())
   duracion        Int
-  largometraje    String
+  largometraje    String        @unique
   actores         String
   año            Int
   disponible      Boolean
@@ -57,35 +57,17 @@ model Pelicula {
   titulo          String
   director        String
   portada         String
-  paisId          Int
-  clasificacionId Int
   idiomaId        Int
   catalogos       Catalogo[]
   comentarios     Comentario[]
   gustos          Gusto[]
-  clasificacion   Clasificacion @relation(fields: [clasificacionId], references: [id])
   idioma          Idioma        @relation(fields: [idiomaId], references: [id])
-  pais            Pais          @relation(fields: [paisId], references: [id])
   subtitulos      Subtitulo[]
-}
-
-model Pais {
-  id        Int        @id @default(autoincrement())
-  nombre    String
-  bandera   String
-  peliculas Pelicula[]
-}
-
-model Clasificacion {
-  id          Int        @id @default(autoincrement())
-  nombre      String
-  edad_minima Int
-  peliculas   Pelicula[]
 }
 
 model Genero {
   id          Int        @id @default(autoincrement())
-  descripcion String
+  nombre      String     @unique @map("descripcion")
   estado      Boolean
   catalogos   Catalogo[]
 }
