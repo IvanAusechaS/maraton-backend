@@ -297,8 +297,29 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+/**
+ * POST /favorites
+ * Añade una película a la lista de favoritos del usuario autenticado.
+ * Si ya existe una preferencia para esta película, actualiza el campo favoritos a true.
+ * Si no existe, crea una nueva preferencia con favoritos en true.
+ *
+ * @route POST /favorites
+ * @middleware verify - Middleware de autenticación JWT
+ * @access Private
+ *
+ * @param {Request} req - Objeto de petición Express
+ * @param {number} req.body - ID de la película a añadir a favoritos
+ * @param {number} req.user.id - ID del usuario autenticado (agregado por middleware)
+ * @param {Response} res - Objeto de respuesta Express
+ *
+ * @returns {Object} 200 - Película añadida exitosamente (preferencia actualizada)
+ * @returns {Object} 201 - Película añadida exitosamente (nueva preferencia creada)
+ * @returns {Object} 404 - Usuario o película no encontrados
+ * @returns {Object} 500 - Error interno del servidor
+ *
+ */
 router.post("/favorites", verify, async (req, res) => {
-  const movieId = req.body;
+  const movieId = req.body.peliculaId;
   const userId = req.user.id;
   try {
     const user = await prisma.usuario.findUnique({
@@ -360,6 +381,22 @@ router.post("/favorites", verify, async (req, res) => {
   }
 });
 
+/**
+ * GET /favorites
+ * Obtiene todas las películas marcadas como favoritas por el usuario autenticado.
+ * 
+ * @route GET /favorites
+ * @middleware verify - Middleware de autenticación JWT
+ * @access Private
+ * 
+ * @param {Request} req - Objeto de petición Express
+ * @param {number} req.user.id - ID del usuario autenticado (agregado por middleware)
+ * @param {Response} res - Objeto de respuesta Express
+ * 
+ * @returns {Object} 200 - Lista de películas favoritas obtenida exitosamente
+ * @returns {Object} 500 - Error al obtener favoritos
+ 
+*/
 router.get("/favorites/", verify, async (req, res) => {
   const userId = req.user.id;
 
@@ -380,6 +417,64 @@ router.get("/favorites/", verify, async (req, res) => {
     const movies = preferences.map((f) => f.pelicula);
 
     res.status(200).json({ total: movies.length, movies });
+  } catch (error) {
+    return globalErrorHandler(error, req, res);
+  }
+});
+
+/**
+ * PATCH /favorites/:id
+ * Actualiza el estado de favorito de una película específica para el usuario autenticado.
+ * Permite marcar o desmarcar una película como favorita.
+ *
+ * @route PATCH /favorites/:id
+ * @middleware verify - Middleware de autenticación JWT
+ * @access Private
+ *
+ * @param {Request} req - Objeto de petición Express
+ * @param {string} req.params.id - ID de la película a actualizar
+ * @param {boolean} req.body.favorite - Nuevo estado de favorito (true/false)
+ * @param {number} req.user.id - ID del usuario autenticado (agregado por middleware)
+ * @param {Response} res - Objeto de respuesta Express
+ *
+ * @returns {Object} 200 - Favorito actualizado exitosamente
+ * @returns {Object} 404 - Error al actualizar favorito (preferencia no existe)
+ */
+router.patch("/favorites/:id", verify, async (req, res) => {
+  const favorite: boolean = req.body.favorite;
+  const movieId = req.params.id;
+  const userId: string = req.user.id;
+
+  try {
+    const existenPreference = await prisma.gusto.findUnique({
+      where: {
+        usuarioId_peliculaId: {
+          usuarioId: Number(userId),
+          peliculaId: Number(movieId),
+        },
+      },
+    });
+
+    if (existenPreference) {
+      const updatedPreference = await prisma.gusto.update({
+        where: {
+          usuarioId_peliculaId: {
+            usuarioId: Number(userId),
+            peliculaId: Number(movieId),
+          },
+        },
+        data: {
+          favoritos: favorite,
+        },
+      });
+
+      res.status(200).json({ gustoActualizado: updatedPreference });
+    } else {
+      return res.status(404).json({
+        message:
+          "No fue posible actualizar favoritos, intentalo de nuevo mas tarde.",
+      });
+    }
   } catch (error) {
     return globalErrorHandler(error, req, res);
   }
