@@ -5,6 +5,7 @@ import {
   notFoundHandler,
 } from "../error_manage/errorHandler";
 import bcrypt from "bcrypt";
+import verify from "../middleware/verifyToken";
 
 const router = Router();
 
@@ -296,8 +297,9 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-router.post("/favorites", async (req, res) => {
-  const { userId, movieId } = req.body;
+router.post("/favorites", verify, async (req, res) => {
+  const movieId = req.body;
+  const userId = req.user.id;
   try {
     const user = await prisma.usuario.findUnique({
       where: { id: Number(userId) },
@@ -348,13 +350,36 @@ router.post("/favorites", async (req, res) => {
         },
       });
 
-      res
-        .status(201)
-        .json({
-          message: "Pelicula añadida a favoritos",
-          gusto: newPreference,
-        });
+      res.status(201).json({
+        message: "Pelicula añadida a favoritos",
+        gusto: newPreference,
+      });
     }
+  } catch (error) {
+    return globalErrorHandler(error, req, res);
+  }
+});
+
+router.get("/favorites/", verify, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const preferences = await prisma.gusto.findMany({
+      where: { usuarioId: Number(userId), favoritos: true },
+      select: {
+        pelicula: true,
+      },
+    });
+
+    if (!preferences) {
+      return res.status(500).json({
+        message:
+          "No se pudieron obtener favoritos, intentalo de nuevo mas tarde",
+      });
+    }
+    const movies = preferences.map((f) => f.pelicula);
+
+    res.status(200).json({ total: movies.length, movies });
   } catch (error) {
     return globalErrorHandler(error, req, res);
   }
