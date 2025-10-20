@@ -21,10 +21,10 @@ const router = Router();
  */
 router.get("/", async (req, res) => {
   try {
-    const peliculas = await prisma.pelicula.findMany();
+    const peliculas = await prisma.pelicula.findMany({where:{disponible: true}});
     res.status(200).json(peliculas);
   } catch (error) {
-    console.error('❌ Error en /api/peliculas:', error);
+    console.error('Error en /api/peliculas:', error);
     return globalErrorHandler(error, req, res);
     //next(error); // lo manda al globalErrorHandler
   }
@@ -47,7 +47,7 @@ router.get("/generos", async (req, res) => {
     const generos = await prisma.genero.findMany();
     res.status(200).json(generos);
   } catch (error) {
-    console.error('❌ Error en /api/peliculas/generos:', error);
+    console.error('Error en /api/peliculas/generos:', error);
     return globalErrorHandler(error, req, res);
   }
 });
@@ -122,7 +122,26 @@ router.get("/genero/:nombre", async (req, res) => {
 
     return res.status(200).json(peliculas);
   } catch (error) {
-    console.error('❌ Error fetching movies by genre name:', error);
+    console.error('Error fetching movies by genre name:', error);
+    return globalErrorHandler(error, req, res);
+  }
+});
+
+
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const pelicula = await prisma.pelicula.update({
+
+      where:{id: Number(id)},
+      data:{
+        disponible:false
+      }
+    });
+    res.status(200).json(pelicula);
+  } catch (error) {
+    console.error('Error en /api/peliculas:', error);
     return globalErrorHandler(error, req, res);
   }
 });
