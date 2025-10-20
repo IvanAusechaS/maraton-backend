@@ -8,6 +8,22 @@ import sendEmail from "../utils/sendEmail";
 
 const router = Router();
 
+const calculateAge = (birthDate: Date): number => {
+  const today = new Date();
+  const birth = new Date(birthDate);
+
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  const dayDiff = today.getDate() - birth.getDate();
+
+  // Ajustar si aún no ha llegado el cumpleaños este año
+  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+    age--;
+  }
+
+  return age;
+};
+
 // POST /auth/register - Registro de usuario
 router.post("/register", async (req: Request, res: Response) => {
   try {
@@ -29,8 +45,6 @@ router.post("/register", async (req: Request, res: Response) => {
     }
 
     console.log("Password recibido:", password);
-
-
 
     // Validación de longitud de contraseña
     const passRegex =
@@ -65,7 +79,7 @@ router.post("/register", async (req: Request, res: Response) => {
       });
     }
 
-    const age: Number = new Date().getFullYear() - birthDate.getFullYear();
+    const age: Number = calculateAge(birthDate);
 
     // Crear usuario
     const nuevoUsuario = await prisma.usuario.create({
@@ -140,12 +154,12 @@ router.post("/login", loginLimiter, async (req: Request, res: Response) => {
     );
 
     // ✅ GUARDAR TOKEN EN COOKIE HTTP-ONLY
-    res.cookie('authToken', token, {
-      httpOnly: true,  // ✅ NO accesible desde JavaScript (previene XSS)
-      secure: process.env.NODE_ENV === 'production', // ✅ Solo HTTPS en producción
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // ✅ Para CORS
+    res.cookie("authToken", token, {
+      httpOnly: true, // ✅ NO accesible desde JavaScript (previene XSS)
+      secure: process.env.NODE_ENV === "production", // ✅ Solo HTTPS en producción
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // ✅ Para CORS
       maxAge: 24 * 60 * 60 * 1000, // 24 horas en milisegundos
-      path: '/',
+      path: "/",
     });
 
     // ✅ NO ENVIAR EL TOKEN EN EL JSON (solo datos del usuario)
@@ -170,13 +184,13 @@ router.post("/login", loginLimiter, async (req: Request, res: Response) => {
 // POST /auth/logout - Cierre de sesión
 router.post("/logout", verify, async (req: Request, res: Response) => {
   // ✅ Limpiar la cookie HTTP-only
-  res.clearCookie('authToken', {
+  res.clearCookie("authToken", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    path: '/',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    path: "/",
   });
-  
+
   return res.status(200).json({ message: "Sesión cerrada correctamente" });
 });
 
@@ -237,10 +251,11 @@ router.post("/recover", async (req: Request, res: Response) => {
      * Points to frontend recovery page.
      * Uses production URL in production, dev URL in development.
      */
-    const frontendUrl = process.env.NODE_ENV === 'production' 
-      ? process.env.FRONTEND_URL_PROD 
-      : process.env.FRONTEND_URL_DEV;
-    
+    const frontendUrl =
+      process.env.NODE_ENV === "production"
+        ? process.env.FRONTEND_URL_PROD
+        : process.env.FRONTEND_URL_DEV;
+
     const resetUrl = `${frontendUrl}/restablecer?token=${resetToken}`;
 
     /**
