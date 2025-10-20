@@ -28,7 +28,7 @@ router.get("/", async (req, res) => {
   } catch (error) {
     //return globalErrorHandler(error, req, res);
     console.error('❌ Error en /api/usuarios:', error);
-    //next(error); // lo manda al globalErrorHandler
+    //next(error);
   }
 });
 

@@ -3,7 +3,7 @@
       "allowUnknownTags": true
     },
     "source": {
-      "include": ["./src", "./index.ts"],
+      "include": ["src"],
       "includePattern": "\\.(jsx|js|ts|tsx)$",
       "excludePattern": "(node_modules/|docs)"
     },
