@@ -21,10 +21,10 @@ model Usuario {
 
 model Gusto {
   id            Int      @id @default(autoincrement())
-  favoritos     Boolean
-  reproducida   Boolean
-  ver_mas_tarde Boolean
-  calificacion  Int
+  favoritos     Boolean  @default(false)
+  reproducida   Boolean  @default(false)
+  ver_mas_tarde Boolean  @default(false)
+  calificacion  Int      @default(0)
   usuarioId     Int
   peliculaId    Int
   pelicula      Pelicula @relation(fields: [peliculaId], references: [id])
