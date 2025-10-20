@@ -24,7 +24,7 @@ model Gusto {
   favoritos     Boolean  @default(false)
   reproducida   Boolean  @default(false)
   ver_mas_tarde Boolean  @default(false)
-  calificacion  Int      @default(0)
+  calificacion  Int?
   usuarioId     Int
   peliculaId    Int
   pelicula      Pelicula @relation(fields: [peliculaId], references: [id])

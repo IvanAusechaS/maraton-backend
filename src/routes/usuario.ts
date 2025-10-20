@@ -28,8 +28,9 @@ router.get("/", async (req, res) => {
     res.status(200).json(usuarios);
   } catch (error) {
     //return globalErrorHandler(error, req, res);
-    console.error("❌ Error en /api/usuarios:", error);
+    //console.error("❌ Error en /api/usuarios:", error);
     //next(error); // lo manda al globalErrorHandler
+    return globalErrorHandler(error,req,res);
   }
 });
 
@@ -397,7 +398,7 @@ router.post("/favorites", verify, async (req, res) => {
  * @returns {Object} 500 - Error al obtener favoritos
  
 */
-router.get("/favorites/", verify, async (req, res) => {
+router.get("/favorites", verify, async (req, res) => {
   const userId = req.user.id;
 
   try {
