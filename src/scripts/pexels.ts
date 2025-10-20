@@ -54,7 +54,6 @@ export async function importarVideos(genres: any, page: number) {
 
       if (!videoUrl) continue;
 
-      // Verificar si ya existe
       const exists = await prisma.pelicula.findUnique({
         where: { largometraje: videoUrl },
       });
@@ -63,8 +62,7 @@ export async function importarVideos(genres: any, page: number) {
         console.log(`Ya existe: ${videoUrl}`);
         continue;
       }
-
-      // Crear película
+      
       const pelicula = await prisma.pelicula.create({
         data: {
           titulo: `Pexels Video ${video.id}`,
