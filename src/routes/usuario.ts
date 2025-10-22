@@ -87,46 +87,31 @@ router.post("/favorites", verify, async (req, res) => {
       return res.status(404).json({ error: "Pelicula no encontrada" });
     }
 
-    // Buscar si ya existe una preferencia
-    const preferences = await prisma.gusto.findUnique({
+    // Registrar intento de añadir favorito (debug)
+    console.log(`[POST /favorites] userId=${userId} movieId=${movieId}`);
+
+    // Usar upsert para garantizar operación atómica: crea si no existe, actualiza si existe
+    const gusto = await prisma.gusto.upsert({
       where: {
         usuarioId_peliculaId: {
           usuarioId: Number(userId),
           peliculaId: Number(movieId),
         },
       },
+      update: {
+        favoritos: true,
+      },
+      create: {
+        usuarioId: Number(userId),
+        peliculaId: Number(movieId),
+        favoritos: true,
+      },
     });
 
-    if (preferences) {
-      // Actualizar preferencia existente
-      await prisma.gusto.update({
-        where: {
-          usuarioId_peliculaId: {
-            usuarioId: Number(userId),
-            peliculaId: Number(movieId),
-          },
-        },
-        data: { 
-          favoritos: true 
-        },
-      });
+    console.log("[POST /favorites] upsert result:", { id: gusto.id, usuarioId: gusto.usuarioId, peliculaId: gusto.peliculaId, favoritos: gusto.favoritos });
 
-      return res.status(200).json({ message: "Pelicula añadida a favoritos" });
-    } else {
-      // Crear nueva preferencia
-      const newPreference = await prisma.gusto.create({
-        data: {
-          usuarioId: Number(userId),
-          peliculaId: Number(movieId),
-          favoritos: true,
-        },
-      });
-
-      return res.status(201).json({
-        message: "Pelicula añadida a favoritos",
-        gusto: newPreference,
-      });
-    }
+    // Devolver el gusto actualizado/creado
+    return res.status(200).json({ message: "Pelicula añadida a favoritos", gusto });
   } catch (error) {
     console.error("Error en POST /favorites:", error);
     return globalErrorHandler(error, req, res);
@@ -159,6 +144,8 @@ router.get("/favorites", verify, async (req, res) => {
         pelicula: true,
       },
     });
+
+    console.log(`[GET /favorites] userId=${userId} found=${preferences.length}`);
 
     if (!preferences) {
       return res.status(500).json({
