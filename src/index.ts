@@ -40,8 +40,9 @@ const corsOptions = {
     }
   },
   credentials: true, // ✅ CRUCIAL: Permite cookies
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  // Allow common request headers used by fetch and clients
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With', 'Origin'],
   exposedHeaders: ['Set-Cookie'],
 };
 
