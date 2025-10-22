@@ -61,6 +61,7 @@ export async function importarVideos(genres: any, page: number) {
       if (exists) {
         console.log(`Ya existe: ${videoUrl}`);
         continue;
+
       }
       
       const pelicula = await prisma.pelicula.create({
@@ -113,6 +114,6 @@ const genres = [
     {name: "Aventura", query: "adventure short film" },
   ];
 
-// pages usados 1 y 2
+// pages usados 1, 2 y 3
 
-importarVideos(genres,2);
+importarVideos(genres,3);
