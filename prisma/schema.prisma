@@ -17,6 +17,17 @@ model Usuario {
   resetPasswordToken   String?
   comentarios          Comentario[]
   gustos               Gusto[]
+  token                UserToken?
+}
+
+model UserToken {
+
+  id                      Int @id @default(autoincrement())
+  resetPasswordExpires    DateTime?
+  resetPasswordToken      String?
+  userId                  Int @unique
+  usuario                 Usuario @relation(fields: [userId], references: [id])
+
 }
 
 model Gusto {
