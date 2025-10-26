@@ -13,8 +13,6 @@ model Usuario {
   password             String
   username             String
   fecha_nacimiento     DateTime
-  resetPasswordExpires DateTime?
-  resetPasswordToken   String?
   comentarios          Comentario[]
   gustos               Gusto[]
   token                UserToken?
