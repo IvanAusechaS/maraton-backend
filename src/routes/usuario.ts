@@ -30,7 +30,7 @@ router.get("/", async (req, res) => {
     //return globalErrorHandler(error, req, res);
     //console.error("❌ Error en /api/usuarios:", error);
     //next(error); // lo manda al globalErrorHandler
-    return globalErrorHandler(error,req,res);
+    return globalErrorHandler(error, req, res);
   }
 });
 
@@ -56,9 +56,9 @@ router.get("/", async (req, res) => {
  *
  */
 router.post("/favorites", verify, async (req, res) => {
-  const movieId = req.body.peliculaId;
-  const userId = req.user.userId;
-  
+  const movieId: number = req.body.peliculaId;
+  const userId: number = req.user.userId;
+
   try {
     // Validar entrada
     if (!movieId) {
@@ -67,8 +67,8 @@ router.post("/favorites", verify, async (req, res) => {
 
     // Verificar que el usuario existe
     const user = await prisma.usuario.findUnique({
-      where: { 
-        id: Number(userId) 
+      where: {
+        id: userId,
       },
     });
 
@@ -78,8 +78,8 @@ router.post("/favorites", verify, async (req, res) => {
 
     // Verificar que la película existe
     const movie = await prisma.pelicula.findUnique({
-      where: { 
-        id: Number(movieId) 
+      where: {
+        id: movieId,
       },
     });
 
@@ -88,30 +88,37 @@ router.post("/favorites", verify, async (req, res) => {
     }
 
     // Registrar intento de añadir favorito (debug)
-    console.log(`[POST /favorites] userId=${userId} movieId=${movieId}`);
+    //console.log(`[POST /favorites] userId=${userId} movieId=${movieId}`);
 
     // Usar upsert para garantizar operación atómica: crea si no existe, actualiza si existe
     const gusto = await prisma.gusto.upsert({
       where: {
         usuarioId_peliculaId: {
-          usuarioId: Number(userId),
-          peliculaId: Number(movieId),
+          usuarioId: userId,
+          peliculaId: movieId,
         },
       },
       update: {
         favoritos: true,
       },
       create: {
-        usuarioId: Number(userId),
-        peliculaId: Number(movieId),
+        usuarioId: userId,
+        peliculaId: movieId,
         favoritos: true,
       },
     });
 
-    console.log("[POST /favorites] upsert result:", { id: gusto.id, usuarioId: gusto.usuarioId, peliculaId: gusto.peliculaId, favoritos: gusto.favoritos });
+    //console.log("[POST /favorites] upsert result:", {
+    //  id: gusto.id,
+    //  usuarioId: gusto.usuarioId,
+    //  peliculaId: gusto.peliculaId,
+    //  favoritos: gusto.favoritos,
+    //});
 
     // Devolver el gusto actualizado/creado
-    return res.status(200).json({ message: "Pelicula añadida a favoritos", gusto });
+    return res
+      .status(200)
+      .json({ message: "Pelicula añadida a favoritos", gusto });
   } catch (error) {
     console.error("Error en POST /favorites:", error);
     return globalErrorHandler(error, req, res);
@@ -145,7 +152,9 @@ router.get("/favorites", verify, async (req, res) => {
       },
     });
 
-    console.log(`[GET /favorites] userId=${userId} found=${preferences.length}`);
+    //console.log(
+    //  `[GET /favorites] userId=${userId} found=${preferences.length}`
+    //);
 
     if (!preferences) {
       return res.status(500).json({
@@ -185,7 +194,7 @@ router.patch("/favorites/:id", verify, async (req, res) => {
   const userId: string = req.user.userId;
 
   try {
-    const existenPreference = await prisma.gusto.findUnique({
+    const existencePreference = await prisma.gusto.findUnique({
       where: {
         usuarioId_peliculaId: {
           usuarioId: Number(userId),
@@ -194,7 +203,7 @@ router.patch("/favorites/:id", verify, async (req, res) => {
       },
     });
 
-    if (existenPreference) {
+    if (existencePreference) {
       const updatedPreference = await prisma.gusto.update({
         where: {
           usuarioId_peliculaId: {
@@ -240,9 +249,9 @@ router.get("/watch-later", verify, async (req, res) => {
 
   try {
     const preferences = await prisma.gusto.findMany({
-      where: { 
-        usuarioId: Number(userId), 
-        ver_mas_tarde: true 
+      where: {
+        usuarioId: Number(userId),
+        ver_mas_tarde: true,
       },
       select: {
         pelicula: true,
