@@ -6,6 +6,7 @@ import "dotenv/config";
 import usuarioRoutes from './routes/usuario'
 import peliculaRoutes from './routes/pelicula'
 import authRoutes from "./routes/auth";
+import comentarioRoutes from './routes/comentario';
 import { notFoundHandler, globalErrorHandler } from './error_manage/errorHandler';
 
 const app = express();
@@ -55,6 +56,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/usuarios', usuarioRoutes)
 app.use('/api/peliculas', peliculaRoutes)
 app.use("/api/auth", authRoutes);
+app.use('/api/comments', comentarioRoutes);
 
 app.use(notFoundHandler);
 
