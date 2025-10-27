@@ -170,9 +170,9 @@ router.delete("/:id", async (req, res) => {
  *
  **/
 router.post("/ratings", verify, async (req, res) => {
-  const movieId: number = req.body.peliculaId;
-  const userId: number = req.user.userId;
-  const rating: number = req.body.calificacion;
+  const movieId: number = Number(req.body.peliculaId);
+  const userId: number = Number(req.user.userId);
+  const rating: number = Number(req.body.calificacion);
 
   try {
     if (!(rating >= 1 && rating <= 5)) {
@@ -308,9 +308,9 @@ router.get("/ratings/:movieId", verify, async (req, res) => {
  * @returns {Object} 500 - Error interno del servidor
  **/
 router.put("/ratings/:movieId", verify, async (req, res) => {
-  const newRating: number = req.body.calificacion;
+  const newRating: number = Number(req.body.calificacion);
   const movieId: string = req.params.movieId;
-  const userId: string = req.user.userId;
+  const userId: number = Number(req.user.userId);
 
   try {
     const existenceMovie = await prisma.pelicula.findUnique({
@@ -323,7 +323,7 @@ router.put("/ratings/:movieId", verify, async (req, res) => {
       const updatedPreference = await prisma.gusto.update({
         where: {
           usuarioId_peliculaId: {
-            usuarioId: Number(userId),
+            usuarioId: userId,
             peliculaId: Number(movieId),
           },
         },
@@ -365,7 +365,7 @@ router.put("/ratings/:movieId", verify, async (req, res) => {
  **/
 router.delete("/ratings/:movieId", verify, async (req, res) => {
   const movieId: string = req.params.movieId;
-  const userId: string = req.user.userId;
+  const userId: number = Number(req.user.userId);
 
   try {
     const existenceMovie = await prisma.pelicula.findUnique({
@@ -378,7 +378,7 @@ router.delete("/ratings/:movieId", verify, async (req, res) => {
       const updatedPreference = await prisma.gusto.update({
         where: {
           usuarioId_peliculaId: {
-            usuarioId: Number(userId),
+            usuarioId: userId,
             peliculaId: Number(movieId),
           },
         },
