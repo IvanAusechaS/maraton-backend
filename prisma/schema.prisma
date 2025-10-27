@@ -91,8 +91,7 @@ model Catalogo {
 
 model Idioma {
   id         Int         @id @default(autoincrement())
-  nombre     String
-  version    String
+  nombre     String      @unique
   peliculas  Pelicula[]
   subtitulos Subtitulo[]
 }
