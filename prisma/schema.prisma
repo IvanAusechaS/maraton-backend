@@ -48,7 +48,7 @@ model Comentario {
   usuarioId         Int
   peliculaId        Int
   comentarioPadreId Int?
-  comentarioPadre   Comentario?  @relation("Respuestas", fields: [comentarioPadreId], references: [id])
+  comentarioPadre   Comentario?  @relation("Respuestas", fields: [comentarioPadreId], references: [id], onDelete: Cascade)
   respuestas        Comentario[] @relation("Respuestas")
   pelicula          Pelicula     @relation(fields: [peliculaId], references: [id])
   usuario           Usuario      @relation(fields: [usuarioId], references: [id])
