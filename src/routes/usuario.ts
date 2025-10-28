@@ -57,7 +57,7 @@ router.get("/", async (req, res) => {
  */
 router.post("/favorites", verify, async (req, res) => {
   const movieId: number = req.body.peliculaId;
-  const userId: number = req.user.userId;
+  const userId: number = req.user.userId; // ✅ Ya viene como número del JWT
 
   try {
     // Validar entrada
@@ -142,11 +142,11 @@ router.post("/favorites", verify, async (req, res) => {
  
 */
 router.get("/favorites", verify, async (req, res) => {
-  const userId = req.user.userId;
+  const userId: number = req.user.userId; // ✅ Ya viene como número del JWT
 
   try {
     const preferences = await prisma.gusto.findMany({
-      where: { usuarioId: Number(userId), favoritos: true },
+      where: { usuarioId: userId, favoritos: true },
       select: {
         pelicula: true,
       },
@@ -191,13 +191,13 @@ router.get("/favorites", verify, async (req, res) => {
 router.patch("/favorites/:id", verify, async (req, res) => {
   const favorite: boolean = req.body.favorite;
   const movieId = req.params.id;
-  const userId: string = req.user.userId;
+  const userId: number = req.user.userId; // ✅ Ya viene como número del JWT
 
   try {
     const existencePreference = await prisma.gusto.findUnique({
       where: {
         usuarioId_peliculaId: {
-          usuarioId: Number(userId),
+          usuarioId: userId,
           peliculaId: Number(movieId),
         },
       },
@@ -207,7 +207,7 @@ router.patch("/favorites/:id", verify, async (req, res) => {
       const updatedPreference = await prisma.gusto.update({
         where: {
           usuarioId_peliculaId: {
-            usuarioId: Number(userId),
+            usuarioId: userId,
             peliculaId: Number(movieId),
           },
         },
@@ -245,12 +245,12 @@ router.patch("/favorites/:id", verify, async (req, res) => {
  
 */
 router.get("/watch-later", verify, async (req, res) => {
-  const userId = req.user.userId;
+  const userId: number = req.user.userId; // ✅ Ya viene como número del JWT
 
   try {
     const preferences = await prisma.gusto.findMany({
       where: {
-        usuarioId: Number(userId),
+        usuarioId: userId,
         ver_mas_tarde: true,
       },
       select: {

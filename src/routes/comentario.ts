@@ -28,7 +28,7 @@ const router = Router();
  */
 router.post("/", verify, async (req: Request, res: Response) => {
   const { peliculaId, mensaje, comentarioPadreId } = req.body;
-  const userId = req.user.userId;
+  const userId: number = req.user.userId; // ✅ Ya viene como número del JWT
 
   try {
     // Validar entrada
@@ -212,7 +212,7 @@ router.get("/:movieId", async (req: Request, res: Response) => {
 router.put("/:id", verify, async (req: Request, res: Response) => {
   const { id } = req.params;
   const { mensaje } = req.body;
-  const userId = req.user.userId;
+  const userId: number = req.user.userId; // ✅ Ya viene como número del JWT
 
   try {
     // Validar entrada
@@ -295,7 +295,7 @@ router.put("/:id", verify, async (req: Request, res: Response) => {
  */
 router.delete("/:id", verify, async (req: Request, res: Response) => {
   const { id } = req.params;
-  const userId = req.user.userId;
+  const userId: number = req.user.userId; // ✅ Ya viene como número del JWT
 
   try {
     // Verificar que el comentario existe

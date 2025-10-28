@@ -171,7 +171,7 @@ router.delete("/:id", async (req, res) => {
  **/
 router.post("/ratings", verify, async (req, res) => {
   const movieId: number = Number(req.body.peliculaId);
-  const userId: number = Number(req.user.userId);
+  const userId: number = req.user.userId; // ✅ Ya viene como número del JWT
   const rating: number = Number(req.body.calificacion);
 
   try {
@@ -310,7 +310,7 @@ router.get("/ratings/:movieId", verify, async (req, res) => {
 router.put("/ratings/:movieId", verify, async (req, res) => {
   const newRating: number = Number(req.body.calificacion);
   const movieId: string = req.params.movieId;
-  const userId: number = Number(req.user.userId);
+  const userId: number = req.user.userId; // ✅ Ya viene como número del JWT
 
   try {
     const existenceMovie = await prisma.pelicula.findUnique({
@@ -365,7 +365,7 @@ router.put("/ratings/:movieId", verify, async (req, res) => {
  **/
 router.delete("/ratings/:movieId", verify, async (req, res) => {
   const movieId: string = req.params.movieId;
-  const userId: number = Number(req.user.userId);
+  const userId: number = req.user.userId; // ✅ Ya viene como número del JWT
 
   try {
     const existenceMovie = await prisma.pelicula.findUnique({

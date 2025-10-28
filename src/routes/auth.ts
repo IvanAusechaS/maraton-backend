@@ -146,7 +146,7 @@ router.post("/login", loginLimiter, async (req: Request, res: Response) => {
     // Generar token JWT
     const token = jwt.sign(
       {
-        userId: usuario.id.toString(),
+        userId: usuario.id, // ✅ Guardar como número, no como string
         email: usuario.email,
       },
       process.env.JWT_SECRET as string,
