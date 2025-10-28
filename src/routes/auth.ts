@@ -235,14 +235,18 @@ router.post("/recover", async (req: Request, res: Response) => {
     /**
      * Store reset token and expiration in user document.
      * Token expires in 1 hour (3600000 ms).
+     * Use upsert to create if doesn't exist or update if exists.
      */
     const resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
 
-    // Cambiar la tabla
-
-    await prisma.userToken.update({
+    await prisma.userToken.upsert({
       where: { userId: user.id },
-      data: {
+      update: {
+        resetPasswordExpires: resetPasswordExpires,
+        resetPasswordToken: resetToken,
+      },
+      create: {
+        userId: user.id,
         resetPasswordExpires: resetPasswordExpires,
         resetPasswordToken: resetToken,
       },
@@ -373,12 +377,21 @@ router.post("/reset/:token", async (req: Request, res: Response) => {
       },
     });
 
-    await prisma.userToken.update({
-      where: {userId: user.id},
-      data: {
-        resetPasswordExpires: null, //poner para fecha actual
-        resetPasswordToken: null, // poner para string por defecto
-      }
+    /**
+     * Invalidate reset token after successful password change.
+     * Use upsert in case the UserToken record was deleted.
+     */
+    await prisma.userToken.upsert({
+      where: { userId: user.id },
+      update: {
+        resetPasswordExpires: null,
+        resetPasswordToken: null,
+      },
+      create: {
+        userId: user.id,
+        resetPasswordExpires: null,
+        resetPasswordToken: null,
+      },
     });
 
     /**
