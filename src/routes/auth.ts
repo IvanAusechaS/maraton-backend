@@ -238,8 +238,10 @@ router.post("/recover", async (req: Request, res: Response) => {
      */
     const resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
 
-    await prisma.usuario.update({
-      where: { id: user.id },
+    // Cambiar la tabla
+
+    await prisma.userToken.update({
+      where: { userId: user.id },
       data: {
         resetPasswordExpires: resetPasswordExpires,
         resetPasswordToken: resetToken,
@@ -334,9 +336,9 @@ router.post("/reset/:token", async (req: Request, res: Response) => {
      * Find user with valid reset token.
      * Ensures token hasn't been used and hasn't expired.
      */
-    const user = await prisma.usuario.findFirst({
+    const user = await prisma.userToken.findFirst({ 
       where: {
-        id: decoded.userId,
+        userId: decoded.userId,
         resetPasswordToken: token,
         resetPasswordExpires: {
           gt: new Date(), // Greater than current date
@@ -368,9 +370,15 @@ router.post("/reset/:token", async (req: Request, res: Response) => {
       where: { id: user.id },
       data: {
         password: hashedPassword,
-        resetPasswordToken: null,
-        resetPasswordExpires: null,
       },
+    });
+
+    await prisma.userToken.update({
+      where: {userId: user.id},
+      data: {
+        resetPasswordExpires: null, //poner para fecha actual
+        resetPasswordToken: null, // poner para string por defecto
+      }
     });
 
     /**
