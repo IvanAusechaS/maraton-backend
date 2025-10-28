@@ -1,5 +1,6 @@
 import prisma from "../db/client";
 import { fetchVideos } from "../services/youtube";
+import { generarSubtitulosAleatorios, obtenerSubtitulos } from "../services/subtitles";
 
 async function createCatalogRegister(peliculaId: number, genero: string) {
     const generoObject = await prisma.genero.findUnique({
@@ -86,6 +87,28 @@ export async function importarVideosYoutube(query: string, genero: string, resul
 
             createCatalogRegister(peliculaResponse.id, genero);
 
+            //console.log(v)
+            //console.log(v.id);
+            const subtitulos = await generarSubtitulosAleatorios(String(peliculaResponse.id));
+            //console.log("Contenido real de subtitulos:", JSON.stringify(subtitulos, null, 2));
+
+            await prisma.subtitulo.upsert({
+              where: {
+                peliculaId_idiomaId: {
+                  peliculaId: peliculaResponse.id,
+                  idiomaId: idioma.id,
+                },
+              },
+              update: {
+                contenido: subtitulos, // Si ya existe, actualiza el contenido
+              },
+              create: {
+                peliculaId: peliculaResponse.id,
+                idiomaId: idioma.id,
+                contenido: subtitulos,
+              },
+            });
+
             console.log(`Pelicula Guardada: ${pelicula.titulo}`);
         }
     } catch(err: any){
@@ -94,4 +117,6 @@ export async function importarVideosYoutube(query: string, genero: string, resul
   
 }
 
-importarVideosYoutube("Cuentos para niños", "Familiar", 30);
+importarVideosYoutube("escenas romanticas de kdramas", "Romance", 10);
+importarVideosYoutube("best moments in call of duty", "Acción", 10);
+importarVideosYoutube("vegeta777", "Aventura", 10);

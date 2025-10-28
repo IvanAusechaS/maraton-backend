@@ -7,6 +7,8 @@ import usuarioRoutes from './routes/usuario'
 import peliculaRoutes from './routes/pelicula'
 import authRoutes from "./routes/auth";
 import comentarioRoutes from './routes/comentario';
+import subtitulosRoutes from './routes/subtitles';
+
 import { notFoundHandler, globalErrorHandler } from './error_manage/errorHandler';
 
 const app = express();
@@ -57,6 +59,7 @@ app.use('/api/usuarios', usuarioRoutes)
 app.use('/api/peliculas', peliculaRoutes)
 app.use("/api/auth", authRoutes);
 app.use('/api/comments', comentarioRoutes);
+app.use('/api/subtitles', subtitulosRoutes);
 
 app.use(notFoundHandler);
 

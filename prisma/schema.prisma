@@ -98,12 +98,12 @@ model Idioma {
 
 model Subtitulo {
   id          Int      @id @default(autoincrement())
-  estado      Boolean
-  color       String
-  fuente      String
-  descriptiva Boolean
+  estado      Boolean  @default(false)
   peliculaId  Int
   idiomaId    Int
+  contenido   Json     
   idioma      Idioma   @relation(fields: [idiomaId], references: [id])
   pelicula    Pelicula @relation(fields: [peliculaId], references: [id])
+
+  @@unique([peliculaId, idiomaId])
 }
