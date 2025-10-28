@@ -13,10 +13,19 @@ model Usuario {
   password             String
   username             String
   fecha_nacimiento     DateTime
-  resetPasswordExpires DateTime?
-  resetPasswordToken   String?
   comentarios          Comentario[]
   gustos               Gusto[]
+  token                UserToken?
+}
+
+model UserToken {
+
+  id                      Int @id @default(autoincrement())
+  resetPasswordExpires    DateTime?
+  resetPasswordToken      String?
+  userId                  Int @unique
+  usuario                 Usuario @relation(fields: [userId], references: [id])
+
 }
 
 model Gusto {
@@ -39,7 +48,7 @@ model Comentario {
   usuarioId         Int
   peliculaId        Int
   comentarioPadreId Int?
-  comentarioPadre   Comentario?  @relation("Respuestas", fields: [comentarioPadreId], references: [id])
+  comentarioPadre   Comentario?  @relation("Respuestas", fields: [comentarioPadreId], references: [id], onDelete: Cascade)
   respuestas        Comentario[] @relation("Respuestas")
   pelicula          Pelicula     @relation(fields: [peliculaId], references: [id])
   usuario           Usuario      @relation(fields: [usuarioId], references: [id])
@@ -82,20 +91,19 @@ model Catalogo {
 
 model Idioma {
   id         Int         @id @default(autoincrement())
-  nombre     String
-  version    String
+  nombre     String      @unique
   peliculas  Pelicula[]
   subtitulos Subtitulo[]
 }
 
 model Subtitulo {
   id          Int      @id @default(autoincrement())
-  estado      Boolean
-  color       String
-  fuente      String
-  descriptiva Boolean
+  estado      Boolean  @default(false)
   peliculaId  Int
   idiomaId    Int
+  contenido   Json     
   idioma      Idioma   @relation(fields: [idiomaId], references: [id])
   pelicula    Pelicula @relation(fields: [peliculaId], references: [id])
+
+  @@unique([peliculaId, idiomaId])
 }
